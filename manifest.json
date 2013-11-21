@@ -1,0 +1,15 @@
+{
+    "description": "A simple metronome",
+    "framework": "ubuntu-sdk-13.10",
+    "hooks": {
+        "uclick": {
+            "apparmor": "uclick.json",
+            "desktop": "uclick.desktop"
+        }
+    },
+    "icon": "uclick.png",
+    "maintainer": "",
+    "name": "com.ubuntu.developer.filip-dobrocky.uclick",
+    "title": "uClick",
+    "version": "1.2.0"
+}

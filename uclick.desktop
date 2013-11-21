@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=uClick
+Comment=A simple metronome
+Exec=/usr/bin/qmlscene $@ /usr/share/uclick/uclick.qml
+Icon=./uclick.png
+Terminal=false
+Type=Application
+X-Ubuntu-Touch=true
