@@ -19,44 +19,24 @@
 
 import QtQuick 2.0
 import Ubuntu.Components 0.1
-import "ui"
+import Ubuntu.Components.Pickers 0.1
 
-/*!
-    A simple metronome
-*/
+Item {
+    property int type: 0
+    property color rectColor: "#00000000"
+    property bool flashOn
+    property variant animation: (type == 0) ? rect.animation : (type == 1) ? circle.animation : null
 
-MainView {
-    // objectName for functional testing purposes (autopilot-qt5)
-    objectName: "uclick"
-    applicationName: "com.ubuntu.developer.filip-dobrocky.uclick"
+    RectVisualisation {
+        id: rect
+        anchors.fill: parent
+        visible: (type == 0)
+    }
 
-    automaticOrientation: true
-
-    headerColor: "#0c3d3b"
-    backgroundColor: "#082826"
-    footerColor: "#041212"
-
-    width: units.gu(45)
-    height: units.gu(70)
-
-    PageStack {
-        id: pageStack
-
-        Component.onCompleted: push(metronomePage)
-
-        MetronomePage {
-            id: metronomePage
-            visible: false
-        }
-
-        SettingsPage {
-            id: settingsPage
-            visible: false
-        }
-
-        AboutPage {
-            id: aboutPage
-            visible: false
-        }
+    CircleVisualisation {
+        id: circle
+        anchors.centerIn: parent
+        size: (parent.width < parent.height) ? parent.width : parent.height
+        visible: (type == 1)
     }
 }
