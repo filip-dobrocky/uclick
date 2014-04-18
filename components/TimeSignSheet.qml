@@ -30,15 +30,13 @@ Item {
     Component {
         id: timeSignComponent
 
-        DefaultSheet {
-            doneButton: true
+        ComposerSheet {
             title: i18n.tr("Time signature")
-            onDoneClicked: {
-                if (textFieldCustom.text != "0" && textFieldCustom.text != ""
-                        && textFieldCustom.text != "00") {
-                    timeSignCount = textFieldCustom.text
-                    timeSign = (timeSignCount == 1) ? timeSignCount + " click"
-                                                    : timeSignCount + " clicks"
+            onConfirmClicked: {
+                if (custom.text != "0" && custom.text != ""
+                        && custom.text != "00") {
+                    timeSignCount = custom.text
+                    timeSign = timeSignCount + " " + i18n.tr("click", "clicks", timeSignCount)
                 } else {
                     switch(timeSign) {
                     case "2/4":
@@ -61,15 +59,11 @@ Item {
                         break;
                     }
                 }
-
-                saveSetting("timeSign", timeSign)
-                saveSetting("timeSignCount", timeSignCount)
-                saveSetting("timeSignIndex", timeSignIndex)
             }
 
             UbuntuShape {
                 anchors.fill: parent
-                color: "#082826"
+                color: backgroundColor
 
                 Row {
                     spacing: units.gu(1)
@@ -85,7 +79,7 @@ Item {
                         expanded: true
                         selectedIndex: timeSignIndex
                         onSelectedIndexChanged: {
-                            timeSign = model[selectedIndex]
+                            if (model !== undefined) timeSign = model[selectedIndex]
                             timeSignIndex = selectedIndex
                         }
                     }
@@ -99,7 +93,7 @@ Item {
                         }
 
                         TextField {
-                            id: textFieldCustom
+                            id: custom
                             inputMask: "99"
                             width: parent.width
                             hasClearButton: false

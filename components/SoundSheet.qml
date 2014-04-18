@@ -33,16 +33,13 @@ Item {
             doneButton: true
             title: i18n.tr("Sound")
             onDoneClicked: {
-                clickSound = selectorClick.selectedIndex
-                accentSound = selectorAccent.selectedIndex
-
-                saveSetting("accentSound", accentSound)
-                saveSetting("clickSound", clickSound)
+                clickSound = clickSelector.selectedIndex
+                accentSound = accentSelector.selectedIndex
             }
 
             UbuntuShape {
                 anchors.fill: parent
-                color: "#082826"
+                color: backgroundColor
 
                 Row {
                     spacing: units.gu(1)
@@ -52,7 +49,7 @@ Item {
                     }
 
                     OptionSelector {
-                        id: selectorClick
+                        id: clickSelector
                         width: (parent.width-units.gu(1))/2
                         containerHeight: parent.height
                         text: i18n.tr("Click")
@@ -62,7 +59,7 @@ Item {
                     }
 
                     OptionSelector {
-                        id: selectorAccent
+                        id: accentSelector
                         width: (parent.width-units.gu(1))/2
                         containerHeight: parent.height
                         text: i18n.tr("Accent")

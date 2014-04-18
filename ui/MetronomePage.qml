@@ -25,93 +25,6 @@ import Ubuntu.Components.Popups 0.1
 import "../components"
 
 Page {
-    // VARIABLES
-    property double accentVolume: 1
-    property double clickVolume: 0.8
-
-    // DATABASE
-    property var db: null
-
-    function openDB() {
-        if(db !== null) return;
-
-        // db = LocalStorage.openDatabaseSync(identifier, version, description, estimated_size, callback(db))
-        db = LocalStorage.openDatabaseSync("uclick", "0.1", "uClick settings", 100000);
-
-        try {
-            db.transaction(function(tx){
-                tx.executeSql('CREATE TABLE IF NOT EXISTS settings(key TEXT UNIQUE, value TEXT)');
-                var table  = tx.executeSql("SELECT * FROM settings");
-                // seed the table with default values
-                if (table.rows.length === 0) {
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["timeSign", "4/4"]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["timeSignCount", 4]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["timeSignIndex", 2]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["accentSound", 0]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["clickSound", 0]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["bpm", 120]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["accentOn", 1]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["flashOn", 1]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["visualisationType", 0]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["accentVolume", 1.0]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["clickVolume", 0.8]);
-                    console.log('Settings table added');
-                };
-            });
-        } catch (err) {
-            console.log("Error creating table in database: " + err);
-        };
-    }
-
-    function saveSetting(key, value) {
-        openDB();
-        db.transaction( function(tx){
-            tx.executeSql('INSERT OR REPLACE INTO settings VALUES(?, ?)', [key, value]);
-        });
-    }
-
-    function getSetting(key) {
-        openDB();
-        var res = "";
-        db.transaction(function(tx) {
-            var rs = tx.executeSql('SELECT value FROM settings WHERE key=?;', [key]);
-            res = rs.rows.item(0).value;
-        });
-        return res;
-    }
-
-    function asignSettings(setting) {
-        switch (setting) {
-        case "visualisationType":
-            visualisation.type = getSetting("visualisationType")
-            break;
-        case "flashOn":
-            visualisation.flashOn = (getSetting("flashOn") === '1')
-            break;
-        case "accentVolume":
-            accentVolume = getSetting("accentVolume")
-            break;
-        case "clickVolume":
-            clickVolume = getSetting("clickVolume")
-            break;
-        default:
-            timeSignSheet.timeSign = getSetting("timeSign")
-            timeSignSheet.timeSignCount = getSetting("timeSignCount")
-            timeSignSheet.timeSignIndex = getSetting("timeSignIndex")
-            soundSheet.accentSound = getSetting("accentSound")
-            soundSheet.clickSound = getSetting("clickSound")
-            bpmSlider.value = getSetting("bpm")
-            accentSwitch.checked = (getSetting("accentOn") === '1')
-            visualisation.type = getSetting("visualisationType")
-            visualisation.flashOn = (getSetting("flashOn") === '1')
-            accentVolume = getSetting("accentVolume")
-            clickVolume = getSetting("clickVolume")
-        }
-    }
-
-    // on startup
-    Component.onCompleted: asignSettings()
-
     // FUNCTIONS
     function playClick(sound) {
         switch (sound) {
@@ -153,7 +66,7 @@ Page {
         else if (tempo >= 208) return "Prestissimo"
     }
 
-    title: i18n.tr("Metronome")
+    title: "uClick"
 
     tools: ToolbarItems {
         ToolbarButton {
@@ -183,21 +96,35 @@ Page {
             iconSource: (checked) ? "../icons/accent-on.svg" : "../icons/accent-off.svg"
             text: (checked) ? i18n.tr("Accent") : i18n.tr("No accent")
 
-            property bool checked
+            property bool checked: (accentOnDoc.contents.accentOn !== undefined) ? accentOnDoc.contents.accentOn : true
 
             onTriggered: {
                 checked = !checked
-                saveSetting("accentOn", +accentSwitch.checked)
+                accentOnDoc.contents = { accentOn: checked }
             }
         }
     }
 
     TimeSignSheet {
         id: timeSignSheet
+
+        timeSign: timeSignDoc.contents.timeSign || "4/4"
+        timeSignCount: timeSignCountDoc.contents.timeSignCount || 4
+        timeSignIndex: timeSignIndexDoc.contents.timeSignIndex || 2
+
+        onTimeSignChanged: timeSignDoc.contents = { timeSign: timeSign }
+        onTimeSignCountChanged: timeSignCountDoc.contents = { timeSignCount: timeSignCount }
+        onTimeSignIndexChanged: timeSignIndexDoc.contents = { timeSignIndex: timeSignIndex }
     }
 
     SoundSheet {
         id: soundSheet
+
+        accentSound: accentSoundDoc.contents.accentSound || 0
+        clickSound: clickSoundDoc.contents.clickSound || 0
+
+        onAccentSoundChanged: accentSoundDoc.contents = { accentSound: accentSound }
+        onClickSoundChanged: clickSoundDoc.contents = { clickSound: clickSound }
     }
 
     BeatVisualisation {
@@ -209,6 +136,9 @@ Page {
             left: parent.left
             margins: units.gu(1)
         }
+
+        type: visualisationTypeDoc.contents.visualisationType || 0
+        flashOn: (flashOnDoc.contents.flashOn !== undefined) ? flashOnDoc.contents.flashOn : true
     }
 
     Column {
@@ -274,46 +204,46 @@ Page {
 
             minimumValue: 30
             maximumValue: 300
-            value: 30
+            value: bpmDoc.contents.bpm || 120
 
-            onValueChanged: saveSetting("bpm", bpmSlider.value)
+            onValueChanged: bpmDoc.contents = { bpm: value }
         }
     }
 
     SoundEffect {
         id: clickSine
         source: "../sounds/click_sine.wav"
-        volume: clickVolume
+        volume: (clickVolumeDoc.contents.clickVolume !== undefined) ? clickVolumeDoc.contents.clickVolume : 0.8
     }
 
     SoundEffect {
         id: accentSine
         source: "../sounds/accent_sine.wav"
-        volume: accentVolume
+        volume: (accentVolumeDoc.contents.accentVolume !== undefined) ? accentVolumeDoc.contents.accentVolume : 1.0
     }
 
     SoundEffect {
         id: clickPluck
         source: "../sounds/click_pluck.wav"
-        volume: clickVolume
+        volume: (clickVolumeDoc.contents.clickVolume !== undefined) ? clickVolumeDoc.contents.clickVolume : 0.8
     }
 
     SoundEffect {
         id: accentPluck
         source: "../sounds/accent_pluck.wav"
-        volume: accentVolume
+        volume: (accentVolumeDoc.contents.accentVolume !== undefined) ? accentVolumeDoc.contents.accentVolume : 1.0
     }
 
     SoundEffect {
         id: clickBass
         source: "../sounds/click_bass.wav"
-        volume: clickVolume
+        volume: (clickVolumeDoc.contents.clickVolume !== undefined) ? clickVolumeDoc.contents.clickVolume : 0.8
     }
 
     SoundEffect {
         id: accentBass
         source: "../sounds/accent_bass.wav"
-        volume: accentVolume
+        volume: (accentVolumeDoc.contents.accentVolume !== undefined) ? accentVolumeDoc.contents.accentVolume : 1.0
     }
 
     Timer {
@@ -329,10 +259,10 @@ Page {
             count = (count < timeSignSheet.timeSignCount) ? ++count : 1
 
             if (count == 1 && accentSwitch.checked) {
-                visualisation.rectColor = "green"
+                visualisation.rectColor = "#BB008000"
                 playAccent(soundSheet.accentSound)
             } else {
-                visualisation.rectColor = "red"
+                visualisation.rectColor = "#BBFF0000"
                 playClick(soundSheet.clickSound)
             }
 

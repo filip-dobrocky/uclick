@@ -19,6 +19,7 @@
 
 import QtQuick 2.0
 import Ubuntu.Components 0.1
+import U1db 1.0 as U1db
 import "ui"
 
 /*!
@@ -32,12 +33,102 @@ MainView {
 
     automaticOrientation: true
 
-    headerColor: "#0c3d3b"
-    backgroundColor: "#082826"
-    footerColor: "#041212"
+    headerColor: "#1d6fa5"
+    backgroundColor: "#124364"
+    footerColor: "#0e344f"
 
     width: units.gu(45)
     height: units.gu(70)
+
+    U1db.Database { id: db; path: "uclick" }
+
+    U1db.Document {
+        id: timeSignDoc
+        database: db
+        docId: "timeSign"
+        create: true
+        defaults: { timeSign: "4/4" }
+    }
+
+    U1db.Document {
+        id: timeSignCountDoc
+        database: db
+        docId: "timeSignCount"
+        create: true
+        defaults: { timeSignCount: 4 }
+    }
+
+    U1db.Document {
+        id: timeSignIndexDoc
+        database: db
+        docId: "timeSignIndex"
+        create: true
+        defaults: { timeSignIndex: 2 }
+    }
+
+    U1db.Document {
+        id: accentSoundDoc
+        database: db
+        docId: "accentSound"
+        create: true
+        defaults: { accentSound: 0 }
+    }
+
+    U1db.Document {
+        id: clickSoundDoc
+        database: db
+        docId: "clickSound"
+        create: true
+        defaults: { clickSound: 0 }
+    }
+
+    U1db.Document {
+        id: bpmDoc
+        database: db
+        docId: "bpm"
+        create: true
+        defaults: { bpm: 120 }
+    }
+
+    U1db.Document {
+        id: accentOnDoc
+        database: db
+        docId: "accentOn"
+        create: true
+        defaults: { accentOn: true }
+    }
+
+    U1db.Document {
+        id: flashOnDoc
+        database: db
+        docId: "flashOn"
+        create: true
+        defaults: { flashOn: true }
+    }
+
+    U1db.Document {
+        id: visualisationTypeDoc
+        database: db
+        docId: "visualisationType"
+        create: true
+        defaults: { visualisationType: 0 }
+    }
+
+    U1db.Document {
+        id: accentVolumeDoc
+        database: db
+        docId: "accentVolume"
+        create: true
+        defaults: { accentVolume: 1.0 }
+    }
+
+    U1db.Document {
+        id: clickVolumeDoc
+        database: db
+        docId: "clickVolume"
+        create: true
+        defaults: { clickVolume: 0.8 }
+    }
 
     PageStack {
         id: pageStack

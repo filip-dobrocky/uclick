@@ -24,58 +24,6 @@ import Ubuntu.Components.ListItems 0.1 as ListItem
 import "../components"
 
 Page {
-    // DATABASE
-    property var db: null
-
-    function openDB() {
-        if(db !== null) return;
-
-        // db = LocalStorage.openDatabaseSync(identifier, version, description, estimated_size, callback(db))
-        db = LocalStorage.openDatabaseSync("uclick", "0.1", "uClick settings", 100000);
-
-        try {
-            db.transaction(function(tx){
-                tx.executeSql('CREATE TABLE IF NOT EXISTS settings(key TEXT UNIQUE, value TEXT)');
-                var table  = tx.executeSql("SELECT * FROM settings");
-                // seed the table with default values
-                if (table.rows.length === 0) {
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["timeSign", "4/4"]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["timeSignCount", 4]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["timeSignIndex", 2]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["accentSound", 0]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["clickSound", 0]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["bpm", 120]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["accentOn", 1]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["flashOn", 1]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["visualisationType", 0]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["accentVolume", 1.0]);
-                    tx.executeSql('INSERT INTO settings VALUES(?, ?)', ["clickVolume", 0.8]);
-
-                    console.log('Settings table added');
-                };
-            });
-        } catch (err) {
-            console.log("Error creating table in database: " + err);
-        };
-    }
-
-    function saveSetting(key, value) {
-        openDB();
-        db.transaction( function(tx){
-            tx.executeSql('INSERT OR REPLACE INTO settings VALUES(?, ?)', [key, value]);
-        });
-    }
-
-    function getSetting(key) {
-        openDB();
-        var res = "";
-        db.transaction(function(tx) {
-            var rs = tx.executeSql('SELECT value FROM settings WHERE key=?;', [key]);
-            res = rs.rows.item(0).value;
-        });
-        return res;
-    }
-
     title: i18n.tr("Settings")
 
     Flickable {
@@ -99,24 +47,19 @@ Page {
                     width: parent.width - units.gu(4)
 
                     text: i18n.tr("Visualisation style")
+                    selectedIndex: visualisationTypeDoc.contents.visualisationType || 0
                     model: [i18n.tr("Rectangle"), i18n.tr("Circle")]
 
-                    Component.onCompleted: selectedIndex = getSetting("visualisationType")
-                    onSelectedIndexChanged: {
-                        saveSetting("visualisationType", selectedIndex)
-                        metronomePage.asignSettings("visualisationType")
-                    }
+                    onSelectedIndexChanged: visualisationTypeDoc.contents = { visualisationType: selectedIndex }
                 }
             }
 
             ListItem.Standard {
                 text: i18n.tr("Flash animation")
                 control: Switch {
-                    Component.onCompleted: checked = (getSetting("flashOn") === '1')
-                    onCheckedChanged: {
-                        saveSetting("flashOn", +checked)
-                        metronomePage.asignSettings("flashOn")
-                    }
+                    checked: (flashOnDoc.contents.flashOn !== undefined) ? flashOnDoc.contents.flashOn : true
+
+                    onCheckedChanged: flashOnDoc.contents = { flashOn: checked }
                 }
             }
 
@@ -133,12 +76,9 @@ Page {
                     function formatValue(v) { return v.toFixed(1) }
                     minimumValue: 0
                     maximumValue: 1
+                    value: (clickVolumeDoc.contents.clickVolume !== undefined) ? clickVolumeDoc.contents.clickVolume : 0.8
 
-                    Component.onCompleted: value = getSetting("clickVolume")
-                    onValueChanged: {
-                        saveSetting("clickVolume", value)
-                        metronomePage.asignSettings("clickVolume")
-                    }
+                    onValueChanged: clickVolumeDoc.contents = { clickVolume: value }
                 }
             }
 
@@ -150,12 +90,9 @@ Page {
                     function formatValue(v) { return v.toFixed(1) }
                     minimumValue: 0.0
                     maximumValue: 1.0
+                    value: (accentVolumeDoc.contents.accentVolume !== undefined) ? accentVolumeDoc.contents.accentVolume : 1.0
 
-                    Component.onCompleted: value = getSetting("accentVolume")
-                    onValueChanged: {
-                        saveSetting("accentVolume", value)
-                        metronomePage.asignSettings("accentVolume")
-                    }
+                    onValueChanged: accentVolumeDoc.contents = { accentVolume: value }
                 }
             }
 
