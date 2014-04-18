@@ -22,6 +22,9 @@ import Ubuntu.Components 0.1
 
 UbuntuShape {
     property ColorAnimation animation: animation
+    property color transparentColor: rectColor
+
+    onTransparentColorChanged: transparentColor.a = 0
 
     color: rectColor
 
@@ -31,7 +34,10 @@ UbuntuShape {
         onClicked: {
             if (!timer.running) timer.start()
             else if (timer.running && !startLabel.visible) stopTimer.start()
-            else if (timer.running && startLabel.visible) timer.stop()
+            else if (timer.running && startLabel.visible) {
+                timer.stop()
+                rectColor = "#00000000"
+            }
         }
 
         Timer {
@@ -72,7 +78,7 @@ UbuntuShape {
 
         running: false
         from: rectColor
-        to: "#00000000"
+        to: transparentColor
         duration: 60000/bpmSlider.value
     }
 }

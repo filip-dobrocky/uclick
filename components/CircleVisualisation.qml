@@ -56,7 +56,7 @@ Dialer {
 
             running: false
             from: rectColor
-            to: "#00000000"
+            to: rect.transparentColor
             duration: 60000/bpmSlider.value
         }
     }
